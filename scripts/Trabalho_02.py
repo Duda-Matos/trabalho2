@@ -24,7 +24,9 @@ import geopandas as gpd
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import locale  
-
+import numpy as np
+#
+#import panda as pd
 # %% 2. Configuração de Parâmetros e Caminhos
 # --- Defina seus caminhos e parâmetros aqui ---
 PASTA_DADOS = r"C:\Users\dudad\Documents\GitHub\ENS5132\trabalho_02\inputs\merra"
@@ -32,7 +34,7 @@ CAMINHO_SHAPEFILE = r"C:\Users\dudad\Documents\GitHub\ENS5132\desafio\inputs\BR_
 # Variável de interesse do MERRA-2 (Tendência Total da Temperatura)
 VARIAVEL_INTERESSE = "DTDTTOT"
 # Nível de pressão em hPa (ex: 850 para baixa troposfera)
-NIVEL_PRESSAO = 850
+NIVEL_PRESSAO = 900
 Lista_dados= ["C:/Users/dudad/Documents/GitHub/ENS5132/trabalho_02/inputs/merra/MERRA2_400.tavgU_3d_tdt_Np.202412.nc4",
 "C:/Users/dudad/Documents/GitHub/ENS5132/trabalho_02/inputs/merra/MERRA2_400.tavgU_3d_tdt_Np.202401.nc4",
 "C:/Users/dudad/Documents/GitHub/ENS5132/trabalho_02/inputs/merra/MERRA2_400.tavgU_3d_tdt_Np.202402.nc4",
@@ -47,10 +49,12 @@ Lista_dados= ["C:/Users/dudad/Documents/GitHub/ENS5132/trabalho_02/inputs/merra/
 "C:/Users/dudad/Documents/GitHub/ENS5132/trabalho_02/inputs/merra/MERRA2_400.tavgU_3d_tdt_Np.202411.nc4"]
 # Lista de variáveis de contribuição para análise comparativa
 VARIAVEIS_CONTRIBUICAO = [
-    'DTDTTOT', 'DTDTANA', 'DTDTDYN', 'DTDTFRI',
+    'DTDTTOT', 'DTDTANA', 'DTDTDYN', 'DTDTFRI',                                         
     'DTDTGWD', 'DTDTMST', 'DTDTRB', 'DTDTRAD']
 PASTA_SAIDA_GRAFICOS= r"C:\Users\dudad\Documents\GitHub\ENS5132\trabalho_02\outputs"
 # %% 3. Carregamento e Preparação dos Dados Raster
+NIVEL_PRESSAO = 900
+nivel_pressao = 900
 
 print("Verificando a existência dos arquivos na lista...")
 arquivos_existentes = []
@@ -135,6 +139,9 @@ except Exception as e:
     data_recortado = None
 
 # %% 5. Análise e Visualização dos Dados
+
+
+
 if data_recortado is not None:
     # GRÁFICO 1: Série Temporal da Média Espacial
     print(">>> Gerando Gráfico 1: Série Temporal da Média...")
@@ -150,21 +157,22 @@ if data_recortado is not None:
             print("Aviso: Nenhum locale pôde ser configurado. As datas podem aparecer em inglês.")
 
 
-
+#%% import numpy as np
     plt.figure(figsize=(14, 6))
-    media_espacial.plot(color='royalblue')
+    plt.plot(np.array(media_espacial),color='royalblue')
     ax = plt.gca()
     ax.xaxis.set_major_locator(mdates.MonthLocator(interval=1))
     ax.xaxis.set_major_formatter(mdates.DateFormatter('%b'))
-    plt.title(f"Média da Tendência de Temperatura em {NIVEL_PRESSAO} hPa para o Brasil no ano de 2024", fontsize=16, pad=20)
+    plt.title(f"Média da Tendência de Temperatura em {NIVEL_PRESSAO} hPa para o Brasil", fontsize=16, pad=20)
     plt.xlabel("2024", fontsize=12)
     plt.ylabel("Tendência Média (K/dia)", fontsize=12)
     plt.grid(True, linestyle='--', alpha=0.6)
     plt.tight_layout()
-    plt.savefig(os.path.join(PASTA_SAIDA_GRAFICOS, "Serie_Temporal_Media_{NIVEL_PRESSAO}.png"), dpi=300, bbox_inches='tight')
+    plt.savefig(os.path.join(PASTA_SAIDA_GRAFICOS, f'Serie_Temporal_Media_{nivel_pressao}.png'), dpi=300, bbox_inches='tight')
     plt.show()
-    plt.show()
-
+    
+    
+#%%
     # GRÁFICO 2: Padrão Espacial da Média Temporal
     print(">>> Gerando Gráfico 2: Mapa da Tendência Média em ...")
     media_temporal = data_recortado.mean(dim='time') * 86400
@@ -181,9 +189,10 @@ if data_recortado is not None:
     plt.ylabel('Latitude', fontsize=12)
     plt.grid(True, linestyle='--', alpha=0.3)
     plt.tight_layout()
-    plt.savefig(os.path.join(PASTA_SAIDA_GRAFICOS, "Mapa_Tendencia_Media. {NIVEL_PRESSAO} .png"), dpi=300, bbox_inches='tight')
+    plt.savefig(os.path.join(PASTA_SAIDA_GRAFICOS, f'Mapa_Tendencia_Media_{nivel_pressao}.png'), dpi=300, bbox_inches='tight')
     plt.show()
 #%%
+    nivel_pressao = '900'
     # GRÁFICO 3: Comparação das Forçantes Físicas
     print(">>> Gerando Gráfico 3: Comparação das Forçantes...")
     plt.figure(figsize=(14, 7))
@@ -205,7 +214,7 @@ if data_recortado is not None:
     plt.legend(title="Forçantes Físicas")
     plt.grid(True, linestyle='--', alpha=0.6)
     plt.tight_layout()
-    plt.savefig(os.path.join(PASTA_SAIDA_GRAFICOS, "Comparacao_Forcantes_Fisicas_200_teste.png"), dpi=300, bbox_inches='tight')
+    plt.savefig(os.path.join(PASTA_SAIDA_GRAFICOS, f'Comparacao_Componentes_Fisicas_{NIVEL_PRESSAO}.png'), dpi=300, bbox_inches='tight')
     plt.show()
 
 print("Análise Concluída")
